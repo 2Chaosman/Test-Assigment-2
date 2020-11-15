@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
@@ -7,23 +8,21 @@ public class EnemySpawner : MonoBehaviour
     public Transform[] allSpawnPoints;
     public GameObject enemyPrefab;
 
-    private int enemiesToSpawn;
-    // Start is called before the first frame update
+    public int enemiesToSpawn;
+    public string enemiesToKillStr;
+    public int enemiesToKillInt;
+
     void Start()
     {
-        enemiesToSpawn = Random.Range(1, allSpawnPoints.Length);
-        Debug.Log(enemiesToSpawn);
+        enemiesToSpawn = UnityEngine.Random.Range(1, allSpawnPoints.Length);
 
-        while(enemiesToSpawn > 0)
+        enemiesToKillStr = enemiesToSpawn.ToString();
+        enemiesToKillInt = Int32.Parse(enemiesToKillStr);
+        
+        while (enemiesToSpawn > 0)
         {
-            Instantiate(enemyPrefab, allSpawnPoints[Random.Range(0, allSpawnPoints.Length)].transform.position, Quaternion.identity);
+            Instantiate(enemyPrefab, allSpawnPoints[UnityEngine.Random.Range(0, allSpawnPoints.Length)].transform.position, Quaternion.identity);
             enemiesToSpawn--;
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

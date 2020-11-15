@@ -4,21 +4,20 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private Rigidbody2D playerRb;
     public GameObject bulletPrefab;
+    public Animator animator;
 
-    public float speed;
+    private Vector3 movementForce;
+    private float speed = 3500;
     private float bulletSpeed = 25;
-    public float jumpHeight;
+    private float jumpHeight = 40;
     private float horizontalInput;
     private bool isGrounded;
-    public bool facingRight;
+    private bool facingRight;
+    private bool isJumped;
+    private bool isShooting;
 
-    private Rigidbody2D playerRb;
-    public Animator animator;
-    
-
-
-    // Start is called before the first frame update
     void Start()
     {
         facingRight = true;
@@ -26,47 +25,92 @@ public class PlayerController : MonoBehaviour
         playerRb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    private void Update()
+    {
+        ReadInput();
+    }
+
+    private void ReadInput()
     {
         horizontalInput = Input.GetAxis("Horizontal");
         Debug.Log(horizontalInput);
+        movementForce = new Vector3(horizontalInput, 0, 0);
 
-        if(horizontalInput < -0.01f || horizontalInput > 0.01f)
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            
-            playerRb.AddForce(Vector2.right * speed * horizontalInput);
-            animator.SetFloat("Speed", Mathf.Abs(horizontalInput));
-
-            if (horizontalInput > 0.01f && !facingRight)
-            {
-                Flip();
-                //facingRight = true;
-            } else if(horizontalInput < -0.01f && facingRight)
-            {
-                Flip();
-                //facingRight = false;
-            }
-        }
-
-        
-        
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            playerRb.AddForce(Vector3.up * jumpHeight, ForceMode2D.Impulse);
-            animator.SetBool("IsJumping", true);
+            isJumped = true;
         }
 
         if (Input.GetButtonDown("Fire1"))
         {
+            isShooting = true;
             animator.SetBool("IsShooting", true);
-            Shoot();
         }
         if (Input.GetButtonUp("Fire1"))
         {
+            isShooting = false;
             animator.SetBool("IsShooting", false);
         }
-        
+    }
+
+    void FixedUpdate()
+    {
+        Move();
+        Shoot();
+        Jump();
+    }
+
+    private void Move()
+    {
+        playerRb.AddForce(movementForce * speed);
+
+        if (horizontalInput > 0.01f && !facingRight)
+        {
+            Flip();
+        }
+        else if (horizontalInput < -0.01f && facingRight)
+        {
+            Flip();
+        }
+
+        animator.SetFloat("Speed", Mathf.Abs(horizontalInput));
+    }
+
+    private void Jump()
+    {
+        if (isJumped)
+        {
+            playerRb.AddForce(Vector3.up * jumpHeight, ForceMode2D.Impulse);
+            animator.SetBool("IsJumping", true);
+            isJumped = false;
+        }
+
+    }
+
+    private void Shoot()
+    {
+        if (isShooting)
+        {
+            GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
+            if (facingRight)
+            {
+                bullet.GetComponent<Rigidbody2D>().velocity = transform.right * bulletSpeed;
+            }
+            else
+            {
+                bullet.GetComponent<Rigidbody2D>().velocity = -transform.right * bulletSpeed;
+            }
+            isShooting = false;
+        }
+    }
+
+    void Flip()
+    {
+        facingRight = !facingRight;
+
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -78,27 +122,5 @@ public class PlayerController : MonoBehaviour
     private void OnCollisionExit2D(Collision2D collision)
     {
         isGrounded = false;
-    }
-
-    private void Shoot()
-    {
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-        if (facingRight)
-        {
-            bullet.GetComponent<Rigidbody2D>().velocity = transform.right * bulletSpeed;
-        } else
-        {
-            bullet.GetComponent<Rigidbody2D>().velocity = -transform.right * bulletSpeed;
-        }
-        
-    }
-
-    void Flip()
-    {
-        facingRight = !facingRight;
-
-        Vector3 theScale = transform.localScale;
-        theScale.x *= -1;
-        transform.localScale = theScale;
     }
 }
