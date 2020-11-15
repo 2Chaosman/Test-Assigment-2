@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
 
     private void ReadInput()
     {
+        //Get input from buttons
         horizontalInput = Input.GetAxis("Horizontal");
         Debug.Log(horizontalInput);
         movementForce = new Vector3(horizontalInput, 0, 0);
@@ -92,6 +93,7 @@ public class PlayerController : MonoBehaviour
         if (isShooting)
         {
             GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
+
             if (facingRight)
             {
                 bullet.GetComponent<Rigidbody2D>().velocity = transform.right * bulletSpeed;
@@ -100,6 +102,7 @@ public class PlayerController : MonoBehaviour
             {
                 bullet.GetComponent<Rigidbody2D>().velocity = -transform.right * bulletSpeed;
             }
+
             isShooting = false;
         }
     }
